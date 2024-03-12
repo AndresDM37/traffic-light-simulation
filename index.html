@@ -1,105 +1,102 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
 
-        #carril {
-            position: relative;
-            width: 100%;
-            height: 100px;
-            background-color: #ccc;
-            border: 1px solid #000;
-            overflow: hidden;
-        }
+    #carril {
+      position: relative;
+      width: 100%;
+      height: 100px;
+      background-color: #ccc;
+      border: 1px solid #000;
+      overflow: hidden;
+    }
 
+    #semaphore {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 50px;
+      height: 50px;
+      background-color: #ddd;
+      border: 1px solid #000;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-        #semaphore {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 50px;
-            height: 50px;
-            background-color: #ddd;
-            border: 1px solid #000;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+    #circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: green;
+      transition: background-color 1s ease-in-out;
+    }
 
-        #circle {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: green;
-            transition: background-color 1s ease-in-out;
-        }
-
-        #car {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 150px;
-            height: 100px;
-            background: url('img/car (1).png') no-repeat center center;
-            background-size: contain;
-            transition: left 1s linear;
-        }
-    </style>
+    #car {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 150px;
+      height: 100px;
+      background: url('img/car (1).png') no-repeat center center;
+      background-size: contain;
+      transition: left 0s ease; /* Remove transition for instant teleport */
+    }
+  </style>
 </head>
 <body>
 
 <div id="carril">
-    <div id="semaphore">
-        <div id="circle"></div>
-    </div>
-    <div id="car"></div>
-</div>
-
-<div class="vertical-carril">
-    <div class="semaphore">
-        <div class="circle"></div>
-    </div>
-    <div class="vertical-car"></div>
+  <div id="semaphore">
+    <div id="circle"></div>
+  </div>
+  <div id="car"></div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var circle = document.getElementById('circle');
-        var car = document.getElementById('car');
+  document.addEventListener('DOMContentLoaded', function () {
+    var circle = document.getElementById('circle');
+    var car = document.getElementById('car');
+    var carrilWidth = parseInt(window.getComputedStyle(document.getElementById('carril')).width, 10);
+    var carWidth = parseInt(window.getComputedStyle(car).width, 10);
 
-        function changeColor() {
-            if (circle.style.backgroundColor === 'green') {
-                circle.style.backgroundColor = 'red';
-            } else {
-                circle.style.backgroundColor = 'green';
-            }
+    function changeColor() {
+      if (circle.style.backgroundColor === 'green') {
+        circle.style.backgroundColor = 'red';
+      } else {
+        circle.style.backgroundColor = 'green';
+      }
+    }
+
+    function moveCar() {
+      var carPosition = parseInt(window.getComputedStyle(car).left, 10);
+
+      if (circle.style.backgroundColor === 'green') {
+        if (carPosition + carWidth < carrilWidth) {
+          car.style.left = carPosition + 8 + 'px'; // Move the car
+        } else {
+          // Teleport the car to the beginning (instantaneous)
+          car.style.left = '0px';
         }
+      }
+    }
 
-        function moveCar() {
-            var carPosition = parseInt(window.getComputedStyle(car).left, 10);
-            var carWidth = parseInt(window.getComputedStyle(car).width, 10);
-            var carrilWidth = parseInt(window.getComputedStyle(document.getElementById('carril')).width, 10);
-
-            if (circle.style.backgroundColor === 'green' && carPosition + carWidth < carrilWidth) {
-                car.style.left = (carPosition + 18) + 'px'; // Aumentar velocidad (5 píxeles en cada paso)
-            }
-        }
-        
-        // Configurar intervalos
-        setInterval(changeColor, 5000); // Cambiar color del semáforo cada 5 segundos
-        setInterval(moveCar, 10); // Mover el carro cada 10 milisegundos
-    });
+    // Configurar intervalos
+    setInterval(changeColor, 5000); // Change color every 5 seconds
+    setInterval(moveCar, 10); // Move the car every 10 milliseconds
+  });
 </script>
 
 </body>
