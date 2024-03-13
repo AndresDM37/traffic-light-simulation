@@ -4,100 +4,161 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  position: relative;
+}
 
-    #carril {
-      position: relative;
-      width: 100%;
-      height: 100px;
-      background-color: #ccc;
-      border: 1px solid #000;
-      overflow: hidden;
-    }
+.container {
+  display: flex;
+}
 
-    #semaphore {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 50px;
-      height: 50px;
-      background-color: #ddd;
-      border: 1px solid #000;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+.carril, .carril2 {
+  position: absolute;
+  background-color: #ccc;
+  border: 1px solid #000;
+  overflow: hidden;
+  z-index: 1;
+}
 
-    #circle {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background-color: green;
-      transition: background-color 1s ease-in-out;
-    }
+.carril {
+  width: 100%;
+  height: 100px;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
 
-    #car {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 150px;
-      height: 100px;
-      background: url('img/car (1).png') no-repeat center center;
-      background-size: contain;
-      transition: left 0s ease; /* Remove transition for instant teleport */
-    }
+.carril2 {
+  width: 100px;
+  height: 100vh;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.semaphore {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  background-color: #ddd;
+  border: 1px solid #000;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Ajustes para que los semáforos aparezcan en las esquinas adecuadas */
+.semaphore1 {
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.semaphore2 {
+  left: -25px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: green;
+  transition: background-color 1s ease-in-out;
+}
+
+.car {
+  position: absolute;
+  width: 150px;
+  height: 100px;
+  background-size: contain;
+  background: url('img/car (1).png') no-repeat center center;
+  transition: transform 0s ease;
+  object-fit: cover;
+}
+
+/* Ajustes para orientar el carro en el carril vertical */
+.car2 {
+  transform: rotate(90deg);
+  transform-origin: center;
+}
+
   </style>
 </head>
 <body>
-
-<div id="carril">
-  <div id="semaphore">
-    <div id="circle"></div>
+<div class="container">
+  <div class="carril" id="carril">
+    <div class="semaphore" id="semaphore1">
+      <div class="circle" id="circle1"></div>
+    </div>
+    <div class="car" id="car1"></div>
   </div>
-  <div id="car"></div>
+
+  <div class="carril2" id="carril2">
+    <div class="semaphore" id="semaphore2">
+      <div class="circle" id="circle2"></div>
+    </div>
+    <div class="car" id="car2"></div>
+  </div>
 </div>
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    var circle = document.getElementById('circle');
-    var car = document.getElementById('car');
-    var carrilWidth = parseInt(window.getComputedStyle(document.getElementById('carril')).width, 10);
-    var carWidth = parseInt(window.getComputedStyle(car).width, 10);
-
-    function changeColor() {
-      if (circle.style.backgroundColor === 'green') {
-        circle.style.backgroundColor = 'red';
-      } else {
-        circle.style.backgroundColor = 'green';
+    // Función para configurar el carril horizontal
+    function setupHorizontalCarril(circleId, carId) {
+      var circle = document.getElementById(circleId);
+      var car = document.getElementById(carId);
+  
+      function changeColor() {
+        circle.style.backgroundColor = circle.style.backgroundColor === 'green' ? 'red' : 'green';
       }
-    }
-
-    function moveCar() {
-      var carPosition = parseInt(window.getComputedStyle(car).left, 10);
-
-      if (circle.style.backgroundColor === 'green') {
-        if (carPosition + carWidth < carrilWidth) {
-          car.style.left = carPosition + 8 + 'px'; // Move the car
-        } else {
-          // Teleport the car to the beginning (instantaneous)
-          car.style.left = '0px';
+  
+      function moveCar() {
+        if (circle.style.backgroundColor === 'green') {
+          var carPosition = parseInt(car.style.left, 10) || 0;
+          carPosition = (carPosition + 10) % window.innerWidth;
+          car.style.left = carPosition + 'px';
         }
       }
+  
+      setInterval(changeColor, 5000);
+      setInterval(moveCar, 100);
     }
-
-    // Configurar intervalos
-    setInterval(changeColor, 5000); // Change color every 5 seconds
-    setInterval(moveCar, 10); // Move the car every 10 milliseconds
+  
+    // Función para configurar el carril vertical
+    function setupVerticalCarril(circleId, carId) {
+      var circle = document.getElementById(circleId);
+      var car = document.getElementById(carId);
+      car.style.right = '0px'; // Asegúrate de que el carro comienza a la derecha para el movimiento vertical
+  
+      function changeColor() {
+        circle.style.backgroundColor = circle.style.backgroundColor === 'green' ? 'red' : 'green';
+      }
+  
+      function moveCarVertical() {
+        if (circle.style.backgroundColor === 'green') {
+          var carPosition = parseInt(car.style.top, 10) || 0;
+          carPosition = (carPosition + 10) % window.innerHeight;
+          car.style.top = carPosition + 'px';
+        }
+      }
+  
+      setInterval(changeColor, 5000);
+      setInterval(moveCarVertical, 100);
+    }
+  
+    setupHorizontalCarril('circle1', 'car1');
+    setupVerticalCarril('circle2', 'car2');
   });
-</script>
+  </script>
+  
 
 </body>
 </html>
