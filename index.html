@@ -4,108 +4,135 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
-  position: relative;
-}
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
 
-.container {
-  display: flex;
-}
+    .container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
 
-.carril, .carril2 {
-  position: absolute;
-  background-color: #ccc;
-  border: 1px solid #000;
-  overflow: hidden;
-  z-index: 1;
-}
+    .carril, .carril2 {
+      position: absolute;
+      background-color: #ccc;
+      border: 1px solid #000;
+      overflow: hidden;
+      z-index: 1;
+    }
 
-.carril {
-  width: 100%;
-  height: 100px;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
+    .carril {
+      width: 100%;
+      height: 100px;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 2;
+    }
 
-.carril2 {
-  width: 100px;
-  height: 100vh;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-}
+    .carril2 {
+      width: 100px;
+      height: 100vh;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1;
+    }
 
-.semaphore {
-  position: absolute;
-  width: 50px;
-  height: 50px;
-  background-color: #ddd;
-  border: 1px solid #000;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+    .semaphore {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background-color: #ddd;
+      border: 1px solid #000;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-/* Ajustes para que los semáforos aparezcan en las esquinas adecuadas */
-.semaphore1 {
-  top: -25px;
-  left: 50%;
-  transform: translateX(-50%);
-}
+    .semaphore1 {
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
 
-.semaphore2 {
-  left: -25px;
-  top: 50%;
-  transform: translateY(-50%);
-}
+    .semaphore2 {
+      left: -25px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
 
-.circle {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: green;
-  transition: background-color 1s ease-in-out;
-}
+    .circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: green;
+      transition: background-color 1s ease-in-out;
+    }
 
-.car {
-  position: absolute;
-  width: 150px;
-  height: 100px;
-  background-size: contain;
-  background: url('img/car (1).png') no-repeat center center;
-  transition: transform 0s ease;
-  object-fit: cover;
-}
+    .car {
+      position: absolute;
+      width: 150px;
+      height: 100px;
+      background-size: contain;
+      transition: transform 0s ease;
+      object-fit: cover;
+      z-index: 3; 
+    }
 
-/* Ajustes para orientar el carro en el carril vertical */
-.car2 {
-  transform: rotate(90deg);
-  transform-origin: center;
-}
+    .car img {
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+    }
+
+    .car2 {
+      transform: rotate(270deg);
+      transform-origin: center;
+    }
 
   </style>
 </head>
 <body>
+  <script>
+      var conn = new WebSocket('ws://localhost:8080/semaphore');
+        
+      conn.onopen = function(e) {
+         console.log("Conexión establecida");
+      };
+
+      conn.onmessage = function(e) {
+    var message = JSON.parse(e.data);
+    console.log("Mensaje recibido: ", message);
+    // Actualiza el color de ambos semáforos
+    document.getElementById("circle1").style.backgroundColor = message.color;
+    document.getElementById("circle2").style.backgroundColor = message.color;
+};
+
+  </script>
 <div class="container">
   <div class="carril" id="carril">
     <div class="semaphore" id="semaphore1">
       <div class="circle" id="circle1"></div>
     </div>
-    <div class="car" id="car1"></div>
+    <div class="car" id="car1">
+      <img src="./img/car (1).png" alt="carro">
+    </div>
   </div>
 
   <div class="carril2" id="carril2">
     <div class="semaphore" id="semaphore2">
       <div class="circle" id="circle2"></div>
     </div>
-    <div class="car" id="car2"></div>
+    <div class="car car2" id="car2"> <!-- Aplicamos la clase car2 aquí -->
+      <img src="./img/car.png" alt="carro">
+    </div>
   </div>
 </div>
 
@@ -123,7 +150,10 @@ body {
       function moveCar() {
         if (circle.style.backgroundColor === 'green') {
           var carPosition = parseInt(car.style.left, 10) || 0;
-          carPosition = (carPosition + 10) % window.innerWidth;
+          carPosition += 10;
+          if(carPosition > window.innerWidth){
+            carPosition = -150; // Restablece la posición del coche para que vuelva a entrar en pantalla
+          }
           car.style.left = carPosition + 'px';
         }
       }
@@ -136,7 +166,6 @@ body {
     function setupVerticalCarril(circleId, carId) {
       var circle = document.getElementById(circleId);
       var car = document.getElementById(carId);
-      car.style.right = '0px'; // Asegúrate de que el carro comienza a la derecha para el movimiento vertical
   
       function changeColor() {
         circle.style.backgroundColor = circle.style.backgroundColor === 'green' ? 'red' : 'green';
@@ -145,7 +174,10 @@ body {
       function moveCarVertical() {
         if (circle.style.backgroundColor === 'green') {
           var carPosition = parseInt(car.style.top, 10) || 0;
-          carPosition = (carPosition + 10) % window.innerHeight;
+          carPosition += 10;
+          if(carPosition > window.innerHeight){
+            carPosition = -100; // Restablece la posición del coche para que vuelva a entrar en pantalla
+          }
           car.style.top = carPosition + 'px';
         }
       }
@@ -157,8 +189,6 @@ body {
     setupHorizontalCarril('circle1', 'car1');
     setupVerticalCarril('circle2', 'car2');
   });
-  </script>
-  
-
+</script>
 </body>
 </html>
